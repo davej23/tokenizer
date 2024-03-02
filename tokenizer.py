@@ -26,14 +26,11 @@ class Tokenizer:
         log_level: level for logger
 
     """
-    def __init__(
-            self, nb_merges: int = 10, max_vocab_size: int = 100000,
-            include_all_utf8: bool = True, log_level: str = "DEBUG"
-    ):
+    def __init__(self, nb_merges: int = 10, max_vocab_size: int = 100000, log_level: str = "DEBUG"):
         self._nb_merges = nb_merges
         self._max_vocab_size = max_vocab_size
         self._byte_pair_map = {}
-        self._vocab = list(range(256)) if include_all_utf8 else []
+        self._vocab = list(range(256))
 
         logger.setLevel(log_level)
 
@@ -59,13 +56,9 @@ class Tokenizer:
         logger.debug(f"train : started training")
 
         byte_list = Tokenizer.convert_to_byte_list(text)
-        unique_byte_list = list(set(byte_list))
-
-        if len(self._vocab) == 0:
-            self._vocab = unique_byte_list
 
         logger.debug(f"train : corpus converted to byte list")
-        logger.debug(f"train : number of unique characters in corpus = {len(unique_byte_list)}")
+        logger.debug(f"train : number of unique characters in corpus = {len(set(byte_list))}")
 
         # If size of vocabulary already larger than maximum vocabulary size, stop
         if len(self._vocab) >= self._max_vocab_size:
@@ -130,6 +123,7 @@ class Tokenizer:
         """Tokenize text into list of bytes"""
 
         text_bytes = list(text.encode("utf-8", errors="replace"))
+        text_bytes = [text_byte if text_byte in self._vocab else -1 for text_byte in text_bytes]
         encoded_text_bytes = text_bytes.copy()
 
         logger.debug(f"tokenize : Text to bytes yielded: {text_bytes}")

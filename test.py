@@ -58,7 +58,7 @@ Privacy Policy ·
 
 
 # Instantiate Tokenizer
-t = Tokenizer(nb_merges=100, max_vocab_size=100000, include_all_utf8=False, log_level="DEBUG")
+t = Tokenizer(nb_merges=100, max_vocab_size=100000, log_level="DEBUG")
 
 # Train tokenizer
 t.train(text)
