@@ -126,35 +126,35 @@ class Tokenizer:
         """Tokenize text into list of bytes"""
 
         text_bytes = list(text.encode("utf-8"))
-        compressed_text_bytes = text_bytes.copy()
+        encoded_text_bytes = text_bytes.copy()
 
         logger.debug(f"tokenize : Text to bytes yielded: {text_bytes}")
 
         for pair, token in self._byte_pair_map.items():
-            for (c1_i, c1), (c2_i, c2) in zip(enumerate(compressed_text_bytes),
-                                              enumerate(compressed_text_bytes[1:], start=1)):
+            for (c1_i, c1), (c2_i, c2) in zip(enumerate(encoded_text_bytes),
+                                              enumerate(encoded_text_bytes[1:], start=1)):
                 if (c1, c2) == pair:
                     logger.debug(f"tokenize : Pair {pair} found in text - inserting token {token}")
-                    compressed_text_bytes[c1_i] = token
-                    compressed_text_bytes.pop(c2_i)
+                    encoded_text_bytes[c1_i] = token
+                    encoded_text_bytes.pop(c2_i)
 
-        return compressed_text_bytes
+        return encoded_text_bytes
 
     def untokenize(self, text_bytes: list[int]) -> str:
         """Convert list of tokens to string"""
 
         logger.debug("untokenize : started untokenize")
 
-        uncompressed_text_bytes = text_bytes.copy()
+        decoded_text_bytes = text_bytes.copy()
 
         for pair, token in self._byte_pair_map.items():
             logger.debug(f"untokenize : Byte pair {pair} for token {token}")
 
-            for c_i, c in enumerate(uncompressed_text_bytes):
+            for c_i, c in enumerate(decoded_text_bytes):
                 logger.debug(f"untokenize : \tText byte {c} at position {c_i}")
                 if c == token:
                     logger.debug(f"untokenize : \tText byte {c} FOUND in byte pair map - inserting {pair} into byte list")
-                    uncompressed_text_bytes[c_i] = pair[0]
-                    uncompressed_text_bytes.insert(c_i + 1, pair[1])
+                    decoded_text_bytes[c_i] = pair[0]
+                    decoded_text_bytes.insert(c_i + 1, pair[1])
 
-        return bytearray(uncompressed_text_bytes).decode("utf-8")
+        return bytearray(decoded_text_bytes).decode("utf-8")
