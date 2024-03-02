@@ -58,7 +58,7 @@ Privacy Policy ·
 
 
 # Instantiate Tokenizer
-t = Tokenizer(nb_merges=100, max_vocab_size=100000, log_level="DEBUG")
+t = Tokenizer(nb_merges=100, max_vocab_size=100000, include_all_utf8=False, log_level="DEBUG")
 
 # Train tokenizer
 t.train(text)
@@ -69,7 +69,7 @@ tokens = t.tokenize(text)
 # print(tokens)  # Print byte-pair tokens
 
 print("Number of unique bytes in text: ", len(set(Tokenizer.convert_to_byte_list(text))))
-print("Number of unique bytes in vocab: ", len(t.get_vocab()))
+print("Number of unique bytes in final vocab: ", len(t.get_vocab()))
 print("Number of tokens in text: ", len(Tokenizer.convert_to_byte_list(text)))
 print("Number of tokens in final text: ", len(tokens))
 
