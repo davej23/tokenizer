@@ -81,3 +81,7 @@ print(f"\nTest text --> ", test_text)
 print("Test tokens --> ", test_tokens)
 print("Decoded test tokens --> ", decoded_test_tokens)
 print("Original test text == Decoded test tokens --> ", test_text == decoded_test_tokens)
+
+onehot_tokens = Tokenizer.onehot_encode(test_tokens, t.get_vocab())
+print("\nOnehot tokens shape: ", len(onehot_tokens), len(onehot_tokens[0]))
+print("Tokens: ", test_tokens, "Onehot token 1.0 indices: ", [n.index(1.0) for n in Tokenizer.onehot_encode(test_tokens, t.get_vocab())])

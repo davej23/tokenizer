@@ -34,15 +34,29 @@ class Tokenizer:
 
         logger.setLevel(log_level)
 
-    def get_vocab(self) -> list[int]:
-        """Get vocabulary"""
+    @staticmethod
+    def _get_byte_pairs(bytes_list: list[int]) -> dict[tuple[int, int], int]:
+        """Convert list of bytes into counter of byte pairs"""
 
-        return self._vocab
+        logger.debug("_get_byte_pairs : started converting byte pair list to counters")
 
-    def get_byte_pair_map(self) -> dict[tuple[int, int], int]:
-        """Get byte-pair to token map"""
+        byte_pair_counter = {}
+        for c1, c2 in zip(bytes_list, bytes_list[1:]):
+            if (c1, c2) not in byte_pair_counter:
+                byte_pair_counter[(c1, c2)] = 1
+            else:
+                byte_pair_counter[(c1, c2)] += 1
 
-        return self._byte_pair_map
+        logger.debug(f"_get_byte_pairs : byte pair counters complete {byte_pair_counter}")
+
+        return byte_pair_counter
+
+    @staticmethod
+    def _sort_byte_pairs(byte_pair_counter: dict[tuple[int, int], int]) -> list[tuple[int, tuple[int, int]]]:
+        """Convert counter of byte pairs into sorted list of most to least occurrent pairs"""
+
+        list_bps = list((v, k) for k, v in byte_pair_counter.items())
+        return list(sorted(list_bps, key=lambda a: a[0], reverse=True))
 
     @staticmethod
     def convert_to_byte_list(text: str) -> list[int]:
@@ -50,22 +64,11 @@ class Tokenizer:
 
         return list(text.encode("utf-8", errors="replace"))
 
-    def train(self, text: str) -> None:
-        """Train tokenizer using input text/corpus"""
+    @staticmethod
+    def onehot_encode(tokens: list[int], vocab: list[int]) -> list[list[float]]:
+        """Convert tokens into one-hot tokens (N tokens with M vocab size --> NxM array)"""
 
-        logger.debug(f"train : started training")
-
-        byte_list = Tokenizer.convert_to_byte_list(text)
-
-        logger.debug(f"train : corpus converted to byte list")
-        logger.debug(f"train : number of unique characters in corpus = {len(set(byte_list))}")
-
-        # If size of vocabulary already larger than maximum vocabulary size, stop
-        if len(self._vocab) >= self._max_vocab_size:
-            logger.warning(f"train: initial vocab size {len(self._vocab)} >= max vocab size {self._max_vocab_size}")
-            return None
-
-        self._train(byte_list)
+        return [[1.0 if vocab.index(token) == i else 0.0 for i in range(len(vocab))] for token in tokens]
 
     def _train(self, text_bytes: list[int]) -> None:
         """Train tokenizer until vocab size >= {self._max_vocab_size}"""
@@ -95,29 +98,32 @@ class Tokenizer:
             else:
                 break
 
-    @staticmethod
-    def _get_byte_pairs(bytes_list: list[int]) -> dict[tuple[int, int], int]:
-        """Convert list of bytes into counter of byte pairs"""
+    def get_vocab(self) -> list[int]:
+        """Get vocabulary"""
 
-        logger.debug("_get_byte_pairs : started converting byte pair list to counters")
+        return self._vocab
 
-        byte_pair_counter = {}
-        for c1, c2 in zip(bytes_list, bytes_list[1:]):
-            if (c1, c2) not in byte_pair_counter:
-                byte_pair_counter[(c1, c2)] = 1
-            else:
-                byte_pair_counter[(c1, c2)] += 1
+    def get_byte_pair_map(self) -> dict[tuple[int, int], int]:
+        """Get byte-pair to token map"""
 
-        logger.debug(f"_get_byte_pairs : byte pair counters complete {byte_pair_counter}")
+        return self._byte_pair_map
 
-        return byte_pair_counter
+    def train(self, text: str) -> None:
+        """Train tokenizer using input text/corpus"""
 
-    @staticmethod
-    def _sort_byte_pairs(byte_pair_counter: dict[tuple[int, int], int]) -> list[tuple[int, tuple[int, int]]]:
-        """Convert counter of byte pairs into sorted list of most to least occurrent pairs"""
+        logger.debug(f"train : started training")
 
-        list_bps = list((v, k) for k, v in byte_pair_counter.items())
-        return list(sorted(list_bps, key=lambda a: a[0], reverse=True))
+        byte_list = Tokenizer.convert_to_byte_list(text)
+
+        logger.debug(f"train : corpus converted to byte list")
+        logger.debug(f"train : number of unique characters in corpus = {len(set(byte_list))}")
+
+        # If size of vocabulary already larger than maximum vocabulary size, stop
+        if len(self._vocab) >= self._max_vocab_size:
+            logger.warning(f"train: initial vocab size {len(self._vocab)} >= max vocab size {self._max_vocab_size}")
+            return None
+
+        self._train(byte_list)
 
     def tokenize(self, text: str) -> list[int]:
         """Tokenize text into list of bytes"""
