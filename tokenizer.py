@@ -65,10 +65,10 @@ class Tokenizer:
         return list(text.encode("utf-8", errors="replace"))
 
     @staticmethod
-    def onehot_encode(tokens: list[int], vocab: list[int]) -> list[list[float]]:
+    def onehot_encode(tokens: list[int], vocab: list[int]) -> list[list[int]]:
         """Convert tokens into one-hot tokens (N tokens with M vocab size --> NxM array)"""
 
-        return [[1.0 if vocab.index(token) == i else 0.0 for i in range(len(vocab))] for token in tokens]
+        return [[1 if vocab.index(token) == i else 0 for i in range(len(vocab))] for token in tokens]
 
     def _train(self, text_bytes: list[int]) -> None:
         """Train tokenizer until vocab size >= {self._max_vocab_size}"""
