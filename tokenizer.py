@@ -20,6 +20,11 @@ class Tokenizer:
     """Tokenizer class
     This tokenizer will be trainable using an input corpus, creating a set of merges and vocabulary
 
+    Args:
+        nb_merges: number of byte-pairs to merge into new token
+        max_vocab_size: maximum size of vocabulary
+        log_level: level for logger
+
     """
     def __init__(self, nb_merges: int = 10, max_vocab_size: int = 100000, log_level: str = "DEBUG"):
         self._nb_merges = nb_merges
@@ -30,9 +35,13 @@ class Tokenizer:
         logger.setLevel(log_level)
 
     def get_vocab(self) -> list[int]:
+        """Get vocabulary"""
+
         return self._vocab
 
     def get_byte_pair_map(self) -> dict[tuple[int, int], int]:
+        """Get byte-pair to token map"""
+
         return self._byte_pair_map
 
     @staticmethod
@@ -42,7 +51,7 @@ class Tokenizer:
         return list(text.encode("utf-8"))
 
     def train(self, text: str) -> None:
-        """Train tokenizer"""
+        """Train tokenizer using input text/corpus"""
 
         logger.debug(f"train : started training")
 
@@ -54,7 +63,9 @@ class Tokenizer:
 
         logger.debug(f"train : number of unique characters in corpus = {len(self._vocab)}")
 
+        # If size of vocabulary already larger than maximum vocabulary size, stop
         if len(self._vocab) >= self._max_vocab_size:
+            logger.warning(f"train: initial vocab size {len(self._vocab)} >= max vocab size {self._max_vocab_size}")
             return None
 
         self._train(byte_list)
